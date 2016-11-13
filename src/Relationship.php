@@ -1,6 +1,6 @@
 <?php
 
-namespace Panoscape\Permissionary;
+namespace Panoscape\Privileges;
 
 /**
 * Relationship
@@ -8,80 +8,124 @@ namespace Panoscape\Permissionary;
 class Relationship
 {
     /**
-     * Query handler
+     * Relation
      *
      * @var mixed
      */
-    protected $query;
+    protected $relation;
     
+    /**
+     * Query scope
+     *
+     * @var string
+     */
     protected $scope;
 
     /**
-     * Create a new query collection instance
+     * Create a new Relationship instance
      *
-     * @param mixed $query
+     * @param mixed $relation
      * @return void
      */
-    function __construct($query, $scope = null)
+    function __construct($relation, $scope = null)
     {
-        $this->query = $query;
+        $this->relation = $relation;
         if(!empty($scope))
         {
             $this->scope = "$scope.";
         }
     }
 
-    function __call($method, $args)
+    public function __call($method, $args)
     {
-        return call_user_func_array([$this->query, $method], $args);
+        return call_user_func_array([$this->relation, $method], $args);
     }
 
     /**
      * Check value
      *
      * @param string $value
-     * @param string $key
+     * @param string $column
      * 
      * @return bool
      */
-    function has($value, $key = 'name')
+    public function has($value, $column = 'name')
     {
-        return $this->query->where("{$this->scope}$key", $value)->count() > 0;
+        return $this->relation->where("{$this->scope}$column", $value)->count() > 0;
     }
 
     /**
      * Check if any values exist
      *
      * @param array $values
-     * @param string $key
+     * @param string $column
      *
      * @return bool
      */
-    function any($values, $key = 'name')
+    public function any($values, $column = 'name')
     {
-        return $this->query->whereIn("{$this->scope}$key", $values)->count() > 0;
+        return $this->relation->whereIn("{$this->scope}$column", $values)->count() > 0;
     }
 
     /**
      * Check if all values exist
      *
      * @param array $values
-     * @param string $key
+     * @param string $column
      *
      * @return bool
      */
-    function all($values, $key = 'name')
+    public function all($values, $column = 'name')
     {
-        return $this->query->whereIn("{$this->scope}$key", $values)->count() >= count($values);
+        return $this->relation->whereIn("{$this->scope}$column", $values)->count() >= count($values);
     }
 
     /**
-     * Get count
+     * Match pattern
      *
-     * @return integer
+     * @param string $pattern use ',' to separate, '()' for 'any', default for 'all', nested match is not supported
+     * @param string $column
+     *
+     * @example 'insert,delete,(query,modify)' means 'with insert and delete and at least one of query or modify'
+     * 
+     * @return bool
      */
-    function count()
+    public function validate($pattern, $column = 'name')
     {
-        return $this->query->count();
+        preg_match_all('/\([^\(\)]+\)|[^\(\)\|\s]+/', $pattern, $groups, PREG_SPLIT_NO_EMPTY);
+
+        if(empty($groups)) return false;
+        $groups = $groups[0];
+        if(empty($groups)) return false;
+
+        $all = [];
+        $any = [];
+
+        foreach($groups as $key=>$value) {
+            if(starts_with($value, '(') && ends_with($value, ')')) {
+                array_push($any, preg_split('/[\|\(\)\s]+/', $value, 0, PREG_SPLIT_NO_EMPTY));
+            }
+            else {
+                array_push($all, $value);
+            }
+        }
+
+        $count = 0;
+        
+        if(!empty($any)) {            
+            foreach($any as $key=>$value) {
+                $relation = clone $this->relation;
+                if($relation->whereIn("{$this->scope}$column", $value)->count() > 0)
+                    $count ++;
+            }
+        }
+
+        if(!empty($all)) {
+            $relation = clone $this->relation;
+            $count += $relation->whereIn("{$this->scope}$column", $all)->count();
+        }
+
+        return $count >= count($groups);
+
     }
 }

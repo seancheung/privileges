@@ -1,8 +1,8 @@
 {
-    "name": "panoscape/permissionary",
+    "name": "panoscape/privileges",
     "description": "Permission control system for Laravel",
     "keywords": ["laravel", "permission", "role", "authorization"],
-    "homepage": "https://github.com/seancheung/permissionary",
+    "homepage": "https://github.com/seancheung/privileges",
     "license": "MIT",       
     "authors": [
         {
@@ -18,7 +18,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Panascape\\Permissionary\\": "src/"
+            "Panoscape\\Privileges\\": "src/"
         }
     },
     "require-dev": {
