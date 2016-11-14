@@ -474,12 +474,6 @@ $user->validate('g=1|(3|5);p=1|(2|10)|3', 'id')
 
 
 
-**attach/detach/sync**
-
-Relationships attaching/detaching/syncing are in the same way as Laravel's Eloquent Relationships Do. See  [ManyToMany Relationships](https://laravel.com/docs/5.3/eloquent-relationships#updating-many-to-many-relationships)
-
-
-
 ## Middleware
 
 If you have registered the middleware, you can add it to any routes you'd like to guard with it.
@@ -494,7 +488,7 @@ Route::get('/pages', 'PageController@index')->middleware('privileges:g=editor|(a
 
 If you have registered the blade service provider, you may guard your blade codes with `@validate` , `@group` and `@privilege`.
 
-Your user entity should implement `Panoscape\Privileges\Privileged` interface before using these blade directives.
+Also your user entity need to implement `Panoscape\Privileges\Privileged` interface in order to use these blade directives.
 
 ```php
 class Admin extends Authenticatable implements \Panoscape\Privileges\Privileged
@@ -513,12 +507,6 @@ Blade directives:
   </button>
  @endgroup
   
- @group('1', 'id')
-  <button>
-  	...
-  </button>
- @endgroup
-  
  @privilege('edit_users')
   <button>
   	...
@@ -532,3 +520,54 @@ Blade directives:
  @endvalidate
 ```
 
+
+
+## Performance
+
+```php
+$user->privileges()->validate('editor_users|edit_admins')
+```
+
+joined 5 tables(2 of them are pivot tables) within one query:
+
+```sql
+select count(*) as aggregate from "permissions" inner join "permission_role" on "permissions"."id" = "permission_role"."permission_id" inner join "roles" on "roles"."id" = "permission_role"."role_id" inner join "admin_role" on "roles"."id" = "admin_role"."role_id" inner join "admins" on "admins"."id" = "admin_role"."admin_id" where "admins"."id" = '1' and "permissions"."name" in ('edit_users', 'edit_admins')
+```
+
+```php
+$user->privileges()->validate('edit_users|(create_admins|edit_admins)')
+```
+
+joined 5 tables(2 of them are pivot tables) within two query:
+
+```sql
+select count(*) as aggregate from "permissions" inner join "permission_role" on "permissions"."id" = "permission_role"."permission_id" inner join "roles" on "roles"."id" = "permission_role"."role_id" inner join "admin_role" on "roles"."id" = "admin_role"."role_id" inner join "admins" on "admins"."id" = "admin_role"."admin_id" where "admins"."id" = '1' and "permissions"."name" in ('create_admins', 'edit_admins')
+```
+
+```sql
+select count(*) as aggregate from "permissions" inner join "permission_role" on "permissions"."id" = "permission_role"."permission_id" inner join "roles" on "roles"."id" = "permission_role"."role_id" inner join "admin_role" on "roles"."id" = "admin_role"."role_id" inner join "admins" on "admins"."id" = "admin_role"."admin_id" where "admins"."id" = '1' and "permissions"."name" in ('edit_users')
+```
+
+
+
+```php
+$user->privileges()->validate('(edit_users|delete_users)|(create_admins|edit_admins)')
+```
+
+joined 5 tables(2 of them are pivot tables) within two query:
+
+```sql
+select count(*) as aggregate from "permissions" inner join "permission_role" on "permissions"."id" = "permission_role"."permission_id" inner join "roles" on "roles"."id" = "permission_role"."role_id" inner join "admin_role" on "roles"."id" = "admin_role"."role_id" inner join "admins" on "admins"."id" = "admin_role"."admin_id" where "admins"."id" = '1' and "permissions"."name" in ('edit_users', 'delete_users')
+```
+
+```sql
+select count(*) as aggregate from "permissions" inner join "permission_role" on "permissions"."id" = "permission_role"."permission_id" inner join "roles" on "roles"."id" = "permission_role"."role_id" inner join "admin_role" on "roles"."id" = "admin_role"."role_id" inner join "admins" on "admins"."id" = "admin_role"."admin_id" where "admins"."id" = '1' and "permissions"."name" in ('create_admins', 'edit_admins')
+```
+
+
+
+**Conclusion**
+
+Each *any* group costs one query;
+
+All *all* group costs one query.
