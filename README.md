@@ -488,7 +488,7 @@ Route::get('/pages', 'PageController@index')->middleware('privileges:g=editor|(a
 
 If you have registered the blade service provider, you may guard your blade codes with `@validate` , `@group` and `@privilege`.
 
-Also your user entity need to implement `Panoscape\Privileges\Privileged` interface in order to use these blade directives.
+Your user entity should implement `Panoscape\Privileges\Privileged` interface before using these blade directives.
 
 ```php
 class Admin extends Authenticatable implements \Panoscape\Privileges\Privileged
