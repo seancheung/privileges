@@ -227,7 +227,7 @@ return [
 ];
 ```
 
-Add `Panoscape\Privileges\Privilege\User` trait  to your user model, `Panoscape\Privileges\Privilege\Group` trait  to your group model, and `Panoscape\Privileges\Privilege\Privilege` trait  to your privilege model.
+Add `Panoscape\Privileges\Privilege\UserEntity` trait  to your user model, `Panoscape\Privileges\Privilege\GroupEntity` trait  to your group model, and `Panoscape\Privileges\Privilege\PrivilegeEntity` trait  to your privilege model.
 
 If you have multiple privileges control flow or you prefer a different profile name, you may copy and modify the default profile template and rename it to something else, `admin_profile` for example. Then defile a property named `privileges_profile` in your related models and set them to the config name of your choice.
 
@@ -273,7 +273,7 @@ return [
 class Admin
 {
   	...
-    use \Panoscape\Privileges\User;
+    use \Panoscape\Privileges\UserEntity;
     protedted privileges_profile = 'admin_profile';
 }
 ```
@@ -284,7 +284,7 @@ class Admin
 class Role
 {
   	...
-    use \Panoscape\Privileges\Group;
+    use \Panoscape\Privileges\GroupEntity;
     protedted privileges_profile = 'admin_profile';
 }
 ```
@@ -295,7 +295,7 @@ class Role
 class Permission
 {
   	...
-    use \Panoscape\Privileges\Privilege;
+    use \Panoscape\Privileges\PrivilegeEntity;
     protedted privileges_profile = 'admin_profile';
 }
 ```

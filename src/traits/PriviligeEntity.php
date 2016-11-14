@@ -5,7 +5,7 @@ namespace Panoscape\Privileges;
 /**
  * Privilege trait
  */
-trait Privilege
+trait PrivilegeEntity
 {
     /**
      * The groups that belong to the privilege

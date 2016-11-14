@@ -5,7 +5,7 @@ namespace Panoscape\Privileges;
 /**
  * Group trait
  */
-trait Group
+trait GroupEntity
 {
     /**
      * The users that belong to the group
