@@ -8,14 +8,23 @@ namespace Panoscape\Privileges;
 trait PrivilegeEntity
 {
     /**
+     * Get the profile name
+     *
+     * @return string
+     */
+    public function profile()
+    {
+        return 'privileges_profile';
+    }
+
+    /**
      * The groups that belong to the privilege
      *
      * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function __groups()
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
-        return $this->belongsToMany(config("$profile.group.model"), config("$profile.group_privilege.table"), config("$profile.group_privilege.privilege_id"), config("$profile.group_privilege.group_id"));
+        return $this->belongsToMany(config("{$this->profile()}.group.model"), config("{$this->profile()}.group_privilege.table"), config("{$this->profile()}.group_privilege.privilege_id"), config("{$this->profile()}.group_privilege.group_id"));
     }
 
     /**
@@ -26,9 +35,7 @@ trait PrivilegeEntity
      */
     public function __get($key)
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
-
-        if($key == config("$profile.group.table")) return $this->__groups();
+        if($key == config("{$this->profile()}.group.table")) return $this->__groups();
 
         return parent::__get($key);
     }
@@ -42,9 +49,7 @@ trait PrivilegeEntity
      */
     public function __call($method, $parameters)
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
-
-        if($method == config("$profile.group.table")) return $this->__groups();
+        if($method == config("{$this->profile()}.group.table")) return $this->__groups();
 
         return parent::__call($method, $parameters);
     }

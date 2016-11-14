@@ -8,14 +8,23 @@ namespace Panoscape\Privileges;
 trait GroupEntity
 {
     /**
+     * Get the profile name
+     *
+     * @return string
+     */
+    public function profile()
+    {
+        return 'privileges_profile';
+    }
+
+    /**
      * The users that belong to the group
      *
      * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function __users()
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
-        return $this->belongsToMany(config("$profile.user.model"), config("$profile.user_group.table"), config("$profile.user_group.group_id"), config("$profile.user_group.user_id"));
+        return $this->belongsToMany(config("{$this->profile()}.user.model"), config("{$this->profile()}.user_group.table"), config("{$this->profile()}.user_group.group_id"), config("{$this->profile()}.user_group.user_id"));
     }
 
     /**
@@ -25,10 +34,9 @@ trait GroupEntity
      */
     public function __privileges()
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
-        return new Relationship($this->belongsToMany(config("$profile.privilege.model"), 
-            config("$profile.group_privilege.table"), config("$profile.group_privilege.group_id"), 
-            config("$profile.group_privilege.privilege_id")));
+        return new Relationship($this->belongsToMany(config("{$this->profile()}.privilege.model"), 
+            config("{$this->profile()}.group_privilege.table"), config("{$this->profile()}.group_privilege.group_id"), 
+            config("{$this->profile()}.group_privilege.privilege_id")));
     }
 
     /**
@@ -39,11 +47,9 @@ trait GroupEntity
      */
     public function __get($key)
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
+        if($key == config("{$this->profile()}.privilege.table")) return $this->__privileges();
 
-        if($key == config("$profile.privilege.table")) return $this->__privileges();
-
-        if($key == config("$profile.user.table")) return $this->__users();
+        if($key == config("{$this->profile()}.user.table")) return $this->__users();
 
         return parent::__get($key);
     }
@@ -57,11 +63,9 @@ trait GroupEntity
      */
     public function __call($method, $parameters)
     {
-        $profile = property_exists($this,'privileges_profile') ? $this->{'privileges_profile'} : 'privileges_profile';
+        if($method == config("{$this->profile()}.privilege.table")) return $this->__privileges();
 
-        if($method == config("$profile.privilege.table")) return $this->__privileges();
-
-        if($method == config("$profile.user.table")) return $this->__users();
+        if($method == config("{$this->profile()}.user.table")) return $this->__users();
 
         return parent::__call($method, $parameters);
     }
