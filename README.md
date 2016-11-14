@@ -507,6 +507,12 @@ Blade directives:
   </button>
  @endgroup
   
+ @group('1', 'id')
+  <button>
+  	...
+  </button>
+ @endgroup
+  
  @privilege('edit_users')
   <button>
   	...
