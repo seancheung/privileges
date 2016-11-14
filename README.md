@@ -270,7 +270,7 @@ return [
 > app/Admin.php
 
 ```php
-class Admin
+class Admin extends Authenticatable
 {
   	...
     use \Panoscape\Privileges\UserEntity;
@@ -285,7 +285,7 @@ class Admin
 > app\Role.php
 
 ```php
-class Role
+class Role extends Model
 {
   	...
     use \Panoscape\Privileges\GroupEntity;
@@ -300,7 +300,7 @@ class Role
 > app\Permission.php
 
 ```php
-class Permission
+class Permission extends Model
 {
   	...
     use \Panoscape\Privileges\PrivilegeEntity;
@@ -486,13 +486,37 @@ Route::get('/pages', 'PageController@index')->middleware('privileges:g=editor|(a
 
 ## Balde
 
-If you have registered the blade service provider, you may guard your blade codes with `@privileges` and `@privilegesend`.
+If you have registered the blade service provider, you may guard your blade codes with `@validate` , `@group` and `@privilege`.
+
+Also your user entity need to implement `Panoscape\Privileges\Privileged` interface in order to use these blade directives.
 
 ```php
-@privileges('g=root')
+class Admin extends Authenticatable implements \Panoscape\Privileges\Privileged
+{
+  	...
+    use \Panoscape\Privileges\UserEntity;
+}
+```
+
+Blade directives:
+
+```php
+@group('root')
   <button>
   	...
   </button>
- @endprivileges
+ @endgroup
+  
+ @privilege('edit_users')
+  <button>
+  	...
+  </button>
+ @endprivilege
+  
+ @validate('g=(root|editor);p=edit_users')
+  <button>
+  	...
+  </button>
+ @endvalidate
 ```
 
