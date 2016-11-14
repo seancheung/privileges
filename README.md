@@ -474,6 +474,12 @@ $user->validate('g=1|(3|5);p=1|(2|10)|3', 'id')
 
 
 
+**attach/detach/sync**
+
+Relationships attaching/detaching/syncing are in the same way as Laravel's Eloquent Relationships Do. See  [ManyToMany Relationships](https://laravel.com/docs/5.3/eloquent-relationships#updating-many-to-many-relationships)
+
+
+
 ## Middleware
 
 If you have registered the middleware, you can add it to any routes you'd like to guard with it.
